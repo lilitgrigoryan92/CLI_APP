@@ -1,7 +1,11 @@
 import os from "os"
+import fs from "fs"
+import path from "path"
+
 
 
 const username = os.userInfo().username;
+const currentDirectory = process.cwd();
 
 console.log(`Welcome ${username}!`);
 
@@ -11,19 +15,133 @@ process.on('SIGINT', () => {
 });
 
 function call(command) {
-  const [operation, argument] = command.split(' ');
+  const [operation, ...args] = command.split(' ');
 
   switch (operation) {
     case '.exit':
       process.emit('SIGINT');
       break;
+    case 'ls':
+      listDirectoryContents();
+      break;
+    case 'add':
+      createFile(args[0]);
+      break;
+    case 'rn':
+      renameFile(args[0], args[1]);
+      break;
+    case 'cp':
+      copyFile(args[0], args[1]);
+      break;
+    case 'mv':
+      moveFile(args[0], args[1]);
+      break;
+    case 'rm':
+      deleteFile(args[0]);
+      break;
     case 'os':
-        callCommandOs(argument);
+      callCommandOs(args[0]);
       break;
     default:
       console.log('Invalid input. Please enter a valid command.');
   }
 }
+
+function listDirectoryContents() {
+  fs.readdir(currentDirectory, (err, files) => {
+    if (err) {
+      console.log('Error reading directory:', err);
+      return;
+    }
+
+    files.sort();
+
+    const directories = [];
+    const fileList = [];
+
+    files.forEach((file) => {
+      const filePath = path.join(currentDirectory, file);
+      const stats = fs.statSync(filePath);
+      const isDirectory = stats.isDirectory();
+      const fileEntry = isDirectory ? `${file} (folder)` : file;
+
+      if (isDirectory) {
+        directories.push(fileEntry);
+      } else {
+        fileList.push(fileEntry);
+      }
+    });
+
+    console.log('Directories:');
+    directories.forEach((dir) => console.log(dir));
+
+    console.log('Files:');
+    fileList.forEach((file) => console.log(file));
+  });
+}
+
+function createFile(fileName) {
+  const filePath = path.join(currentDirectory, fileName);
+  fs.writeFile(filePath, '', (err) => {
+    if (err) {
+      console.log('Error creating file:', err);
+      return;
+    }
+    console.log(`File "${fileName}" created successfully.`);
+  });
+}
+
+function renameFile(oldPath, newFileName) {
+  const oldFilePath = path.join(currentDirectory, oldPath);
+  const newFilePath = path.join(currentDirectory, newFileName);
+
+  fs.rename(oldFilePath, newFilePath, (err) => {
+    if (err) {
+      console.log('Error renaming file:', err);
+      return;
+    }
+    console.log(`File "${oldPath}" renamed to "${newFileName}" successfully.`);
+  });
+}
+
+function copyFile(sourcePath, destinationPath) {
+  const sourceFilePath = path.join(currentDirectory, sourcePath);
+  const destinationFilePath = path.join(currentDirectory, destinationPath);
+
+  fs.copyFile(sourceFilePath, destinationFilePath, (err) => {
+    if (err) {
+      console.log('Error copying file:', err);
+      return;
+    }
+    console.log(`File "${sourcePath}" copied to "${destinationPath}" successfully.`);
+  });
+}
+
+function moveFile(sourcePath, destinationPath) {
+  const sourceFilePath = path.join(currentDirectory, sourcePath);
+  const destinationFilePath = path.join(currentDirectory, destinationPath);
+
+  fs.rename(sourceFilePath, destinationFilePath, (err) => {
+    if (err) {
+      console.log('Error moving file:', err);
+      return;
+    }
+    console.log(`File "${sourcePath}" moved to "${destinationPath}" successfully.`);
+  });
+}
+
+function deleteFile(filePath) {
+  const fileToDelete = path.join(currentDirectory, filePath);
+
+  fs.unlink(fileToDelete, (err) => {
+    if (err) {
+      console.log('Error deleting file:', err);
+      return;
+    }
+    console.log(`File "${filePath}" deleted successfully.`);
+  });
+}
+
 
 function callCommandOs(argument) {
   switch (argument) {
@@ -55,6 +173,7 @@ function callCommandOs(argument) {
       break;
     default:
       console.log('Invalid input. Please enter a valid command.');
+     
   }
 }
 
@@ -62,3 +181,4 @@ process.stdin.on('data', (data) => {
   const command = data.toString().trim();
   call(command);
 });
+
