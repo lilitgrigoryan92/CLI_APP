@@ -43,7 +43,7 @@ function call(command) {
       callCommandOs(args[0]);
       break;
     default:
-      console.log('Invalid input. Please enter a valid command.');
+      console.log('Invalid input.');
   }
 }
 
@@ -97,7 +97,7 @@ function renameFile(oldPath, newFileName) {
 
   fs.rename(oldFilePath, newFilePath, (err) => {
     if (err) {
-      console.log('Error renaming file:', err);
+      console.log('Renaming failed:', err);
       return;
     }
     console.log(`File "${oldPath}" renamed to "${newFileName}" successfully.`);
@@ -105,12 +105,12 @@ function renameFile(oldPath, newFileName) {
 }
 
 function copyFile(sourcePath, destinationPath) {
-  const sourceFilePath = path.join(currentDirectory, sourcePath);
+  const sourceFilePath= path.join(currentDirectory, sourcePath);
   const destinationFilePath = path.join(currentDirectory, destinationPath);
 
   fs.copyFile(sourceFilePath, destinationFilePath, (err) => {
     if (err) {
-      console.log('Error copying file:', err);
+      console.log('Copying failed:', err);
       return;
     }
     console.log(`File "${sourcePath}" copied to "${destinationPath}" successfully.`);
