@@ -2,8 +2,6 @@ import os from "os"
 import fs from "fs"
 import path from "path"
 
-
-
 const username = os.userInfo().username;
 const currentDirectory = process.cwd();
 
@@ -47,6 +45,8 @@ function call(command) {
   }
 }
 
+const fileIndex = [];
+
 function listDirectoryContents() {
   fs.readdir(currentDirectory, (err, files) => {
     if (err) {
@@ -57,26 +57,32 @@ function listDirectoryContents() {
     files.sort();
 
     const directories = [];
-    const fileList = [];
+    const fileList = []
 
     files.forEach((file) => {
       const filePath = path.join(currentDirectory, file);
       const stats = fs.statSync(filePath);
       const isDirectory = stats.isDirectory();
-      const fileEntry = isDirectory ? `${file} (folder)` : file;
+      const fileEntry = {
+        name: file,
+        type: isDirectory ? "directory" : "file"
+      }
+      fileIndex.push(fileEntry)
+
+      
 
       if (isDirectory) {
         directories.push(fileEntry);
       } else {
         fileList.push(fileEntry);
       }
-    });
+     });
 
     console.log('Directories:');
-    directories.forEach((dir) => console.log(dir));
+    directories.forEach((dir,index) => console.log(`${index},${dir.name},${dir.type}`));
 
     console.log('Files:');
-    fileList.forEach((file) => console.log(file));
+    fileIndex.forEach((file,index) => console.log(`${index}\t${file.name}\t${file.type}`));
   });
 }
 
@@ -88,7 +94,8 @@ function createFile(fileName) {
       return;
     }
     console.log(`File "${fileName}" created successfully.`);
-  });
+
+})
 }
 
 function renameFile(oldPath, newFileName) {
@@ -142,7 +149,6 @@ function deleteFile(filePath) {
   });
 }
 
-
 function callCommandOs(argument) {
   switch (argument) {
     case '--cpus':
@@ -173,7 +179,6 @@ function callCommandOs(argument) {
       break;
     default:
       console.log('Invalid input. Please enter a valid command.');
-     
   }
 }
 
@@ -181,4 +186,3 @@ process.stdin.on('data', (data) => {
   const command = data.toString().trim();
   call(command);
 });
-
