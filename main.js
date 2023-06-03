@@ -79,7 +79,7 @@ function listDirectoryContents() {
      });
 
     console.log('Directories:');
-    directories.forEach((dir,index) => console.log(`${index},${dir.name},${dir.type}`));
+    directories.forEach((dir,index) => console.log(`${index}\t${dir.name}\t${dir.type}`));
 
     console.log('Files:');
     fileIndex.forEach((file,index) => console.log(`${index}\t${file.name}\t${file.type}`));
